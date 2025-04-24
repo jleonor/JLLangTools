@@ -5,8 +5,12 @@ import contextlib
 import librosa
 import torch
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
-import psutil  # Optional, for logging memory usage
 
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
 app = Flask(__name__)
 
 # Mapping from language keys to model directories
@@ -52,8 +56,7 @@ def transcribe_audio(audio_file, lang_key):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    # Optional: log memory usage if psutil is available
-    if psutil:
+    if PSUTIL_AVAILABLE:
         process = psutil.Process()
         print(f"Starting transcription. Memory usage: {process.memory_info().rss / (1024*1024):.2f} MB")
 
