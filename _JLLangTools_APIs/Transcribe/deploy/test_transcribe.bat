@@ -7,6 +7,13 @@ set SETTINGS_FILE=C:\Users\jonat\OneDrive\Desktop\DevProjects\JLLangTools\_JLLan
 for /f "delims=" %%A in ('powershell -NoProfile -Command "(Get-Content '%SETTINGS_FILE%' | ConvertFrom-Json).transcribe.api_url"') do set API_URL=%%A
 echo API URL is %API_URL%
 
+:: --- NEW: Check device endpoint ---
+for /f "delims=" %%D in (
+    'powershell -NoProfile -Command "(Invoke-RestMethod '%API_URL%/device').device"'
+) do set DEVICE=%%D
+echo Device in use: %DEVICE%
+echo.
+
 :: Define the test files directory
 set TEST_FILES_DIR=%~dp0test_files
 
