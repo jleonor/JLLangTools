@@ -1,21 +1,22 @@
-# Use the official PyTorch GPU image as base (includes CUDA, cuDNN, etc.)
+# Dockerfile
 FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 
-# Install ffmpeg (for audio processing)
 RUN apt-get update && apt-get install -y ffmpeg
 
-# Set the working directory
 WORKDIR /app
 
-# Copy the application files (except large models)
+# Install Python deps first so they layer-cache
 COPY requirements.txt .
+RUN pip install --upgrade pip \
+ && pip install --no-cache-dir --ignore-installed -r requirements.txt
+
+# Copy your application code
 COPY app.py .
 COPY download_Whisper.py .
 
-# Install Python dependencies
-RUN pip install --upgrade pip && pip install --no-cache-dir --ignore-installed -r requirements.txt
+# Copy the pre-downloaded models into the image
+COPY Whisper ./Whisper
 
-# Expose the Flask app port
 EXPOSE 5000
 
 # Download the models when the container starts, then launch the app
