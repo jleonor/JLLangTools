@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set SETTINGS_FILE=C:\Users\jonat\OneDrive\Desktop\DevProjects\JLLangTools\_JLLangTools_APIs\appsettings.json
+set SETTINGS_FILE=C:\Users\jonat\OneDrive\Desktop\DevProjects\JLLangTools\appsettings.json
 
 :: Retrieve API URL from JSON settings
 for /f "delims=" %%A in ('powershell -NoProfile -Command "(Get-Content '%SETTINGS_FILE%' | ConvertFrom-Json).transcribe.api_url"') do set API_URL=%%A
@@ -12,6 +12,11 @@ for /f "delims=" %%D in (
     'powershell -NoProfile -Command "(Invoke-RestMethod '%API_URL%/device').device"'
 ) do set DEVICE=%%D
 echo Device in use: %DEVICE%
+echo.
+
+:: --- NEW: Get supported languages ---
+echo Fetching supported languages from API...
+powershell -NoProfile -Command "(Invoke-RestMethod '%API_URL%/languages').languages -join ', '"
 echo.
 
 :: Define the test files directory

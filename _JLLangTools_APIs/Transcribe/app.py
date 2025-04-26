@@ -106,9 +106,13 @@ def get_device():
     device = "GPU" if torch.cuda.is_available() else "CPU"
     return jsonify({"device": device})
 
-@app.route('/test', methods=['GET'])
-def test():
-    return jsonify({"message": "Test endpoint works!"})
+@app.route('/languages', methods=['GET'])
+def get_languages():
+    """
+    Endpoint to return supported language keys from the model mapping.
+    """
+    return jsonify({"languages": list(MODEL_MAPPING.keys())})
+
 
 
 if __name__ == '__main__':

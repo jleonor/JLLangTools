@@ -1,6 +1,6 @@
 @echo off
 :: Define the path to the settings file
-set SETTINGS_FILE=C:\Users\jonat\OneDrive\Desktop\DevProjects\JLLangTools\_JLLangTools_APIs\appsettings.json
+set SETTINGS_FILE=C:\Users\jonat\OneDrive\Desktop\DevProjects\JLLangTools\appsettings.json
 
 :: Extract docker_port from JSON using PowerShell and capture the output
 for /f "usebackq delims=" %%A in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "& { (Get-Content '%SETTINGS_FILE%' | ConvertFrom-Json).transcribe.docker_port }"`) do set DOCKER_PORT=%%A
