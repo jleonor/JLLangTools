@@ -1,93 +1,189 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-  }
-  .navbar {
-    background: #004080;
-    color: #fff;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .navbar .links a {
-    color: #fff;
-    margin-left: 1rem;
-    text-decoration: none;
-  }
-  main {
-    flex: 1;                  /* grow to fill */
-    display: flex;            /* turn main into a flex container too */
-    align-items: center;      /* vertical centering of children */
-    justify-content: center;  /* horizontal centering */
-    padding: 2rem;
-
-}
-  /* 4) Make the upload box fill its container (if you want it flush) */
-  .upload-box {
-    width: 100%;
-    height: 90%;             /* fill the flex‐item height */
-    display: flex;            /* so its inner text/form can also center */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border: 2px dashed #888;
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.3s;
-  }
-  .upload-box:hover {
-    border-color: #004080;
-  }
-  .columns {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-  }
-  .column {
-    width: 48%;
-  }
-  .segment-controls button {
-    margin-right: 0.5rem;
-  }
-  .segment-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    justify-content: center
-  }
-  .hidden {
-    display: none;
-  }
-  .progress-container,
-  .status-container {
-    text-align: center;
-  }
-
-/* 1) Ensure the html/body fill the viewport */
+/* 1) Ensure html/body fill the viewport */
 html, body {
-    height: 100%;
-    margin: 0;
-  }
-  
-  /* 2) Make body a column flex container */
-  body {
-    display: flex;
-    flex-direction: column;
-    font-family: Arial, sans-serif;
-  }
+  height: 100%;
+  margin: 0;
+}
 
-  .column {
-    width: 100%
-  }
+/* 2) Make body a column flex container */
+body {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
 
-  input {
-    width: 60px;
-    text-align: center;
-  }
+/* Navbar */
+.navbar {
+  background: #004080;
+  color: #fff;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navbar .links a {
+  color: #fff;
+  margin-left: 1rem;
+  text-decoration: none;
+}
 
-  .columns{
-    width: 600px;
-  }
+/* Main upload/view area */
+main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Upload box */
+.upload-box {
+  width: 100%;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #888;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+.upload-box:hover {
+  border-color: #004080;
+}
+
+/* Upload form columns */
+.columns {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  width: 600px;
+}
+.column {
+  width: 48%;
+}
+
+/* Segment controls */
+.segment-controls button {
+  margin-right: 0.5rem;
+}
+.segment-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+/* Hidden utility */
+.hidden {
+  display: none;
+}
+
+/* Progress & status */
+.progress-container,
+.status-container {
+  text-align: center;
+}
+
+/* Input styling */
+input {
+  width: 60px;
+  text-align: center;
+}
+
+/* Files layout (under navbar) */
+.files-main {
+  display: flex;
+  height: calc(100vh - 60px);
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* Files column containers */
+.files-column {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 90%;
+  overflow: hidden;
+}
+
+/* Left list scroll */
+#files-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Right viewer pane */
+#file-viewer-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+#file-viewer-pane > pre {
+  flex: 1;
+  overflow-y: auto;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* File-row styling */
+.file-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 12px;
+}
+.file-row:hover {
+  background: #f0f0f0;
+}
+.file-row.selected {
+  background: #d0e4fc;
+}
+
+/* File tags */
+.file-tags {
+  width: 400px;
+  text-align: right;
+}
+.file-tags span {
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.25rem;
+  font-size: 8px;
+  color: #fff;
+}
+.tag-lang {
+  background: #007acc;
+}
+.tag-time {
+  background: #555;
+}
+.tag-ext {
+  background: #888;
+}
+
+/* Indent children rows */
+.file-children {
+  padding-left: 1.5rem;
+}
+/* Remove background on sub-rows */
+.file-children .file-row {
+  background: transparent !important;
+}
+.file-children .file-row:hover {
+  background: rgba(0, 0, 0, 0.05);
+}

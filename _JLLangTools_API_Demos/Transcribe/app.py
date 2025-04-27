@@ -1,15 +1,18 @@
 import os
 import json
+import pathlib
+import urllib.parse
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory, abort, send_file
+import pathlib
 import requests
 from werkzeug.utils import secure_filename
 
-# our new helpers
+# Helpers
 from utils.atomic_queue import AtomicQueue
 from utils.request_utils import save_request
 
-# ── Setup directories ───────────────────────────────────────────────────────
+# ── Setup directories ────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -25,7 +28,7 @@ for fname in (
     open(os.path.join(DATA_DIR, fname), 'a').close()
 
 # initialize the converter queue
-converter_queue = AtomicQueue(os.path.join(DATA_DIR, 'converter.queue'))
+a_converter = AtomicQueue(os.path.join(DATA_DIR, 'converter.queue'))
 
 # load API settings
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, '..', '..'))
@@ -34,7 +37,7 @@ with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
     settings = json.load(f)
 API_URL = settings['transcribe']['api_url']
 
-# ── Flask app ─────────────────────────────────────────────────────────────
+# ── Flask app ──────────────────────────────────────────────────────────────────
 app = Flask(__name__)
 
 @app.route('/')
@@ -105,7 +108,7 @@ def transcribe():
     save_request(subfolder_path, req_info)
 
     # 9) Enqueue for conversion
-    converter_queue.enqueue(subfolder_name)
+    a_converter.enqueue(subfolder_name)
 
     # 10) Forward to external API (passthrough)
     files = {'audio': open(saved_path, 'rb')}
@@ -121,10 +124,67 @@ def transcribe():
         resp.raise_for_status()
         return jsonify(resp.json()), resp.status_code
     except requests.RequestException as e:
-        # forward error
         text = e.response.text if e.response is not None else str(e)
         code = e.response.status_code if e.response is not None else 500
         return text, code
+
+# ── New: Files Browser ──────────────────────────────────────────────────────────
+@app.route('/files')
+def files_index():
+    # fetch device for navbar
+    try:
+        r = requests.get(f"{API_URL}/device")
+        device = r.json().get('device', 'Unknown')
+    except Exception:
+        device = 'Unknown'
+
+    batches = []
+    for name in os.listdir(DATA_DIR):
+        sub = os.path.join(DATA_DIR, name)
+        rq = os.path.join(sub, 'request.json')
+        if os.path.isdir(sub) and os.path.exists(rq):
+            info = json.load(open(rq, 'r', encoding='utf-8'))
+            info['folder'] = name
+            info['sent_time_dt'] = datetime.fromisoformat(info['sent_time'])
+            batches.append(info)
+    # sort descending by sent_time
+    batches.sort(key=lambda b: b['sent_time_dt'], reverse=True)
+
+    return render_template('files.html', batches=batches, device=device)
+
+@app.route('/download/<path:subpath>')
+def download_file(subpath):
+    # Build the secure path
+    safe = pathlib.Path(DATA_DIR) / pathlib.Path(subpath)
+    try:
+        safe = safe.resolve().relative_to(DATA_DIR)
+    except Exception:
+        abort(404)
+
+    full_path = pathlib.Path(DATA_DIR) / safe
+    if not full_path.is_file():
+        abort(404)
+
+    # send_file takes the filesystem path directly and sets Content-Disposition for you
+    return send_file(str(full_path), as_attachment=True)
+
+
+@app.route('/files/content')
+def file_content():
+    raw = urllib.parse.unquote(request.args.get('path', ''))
+    safe = pathlib.Path(DATA_DIR) / pathlib.Path(raw)
+    try:
+        safe.relative_to(DATA_DIR)
+    except ValueError:
+        return ('', 404)
+    if not safe.exists() or not safe.is_file():
+        return ('', 404)
+
+    text = safe.read_text(encoding='utf-8')
+    if safe.suffix.lower() == '.json':
+        return text, 200, {'Content-Type': 'application/json; charset=utf-8'}
+    else:
+        return text, 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 if __name__ == '__main__':
     app.run(debug=True, port=6001)
