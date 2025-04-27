@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JLLangTools Transcription API Demo ({{ device }})</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <span class="title">JLLangTools Transcription API Demo ({{ device }})</span>
+    <div class="links">
+      <a href="#">Files</a>
+      <a href="#">Analytics</a>
+    </div>
+  </nav>
+
+  <main>
+    <div id="upload-box" class="upload-box">
+      <p>Drag & drop or click to upload</p>
+      <form id="upload-form">
+        <div class="columns">
+          <div class="column">
+            <h3>Model</h3>
+            <select id="model-select">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+          <div class="column">
+            <h3>Segments (optional)</h3>
+            <div class="segment-controls">
+              <button type="button" id="add-seg">Add</button>
+              <button type="button" id="reset-seg">Reset</button>
+            </div>
+            <div id="segments-container" class="segments-container">
+              <div class="segment-row">
+                <input type="text" name="start" placeholder="00:00:00">
+                <span>to</span>
+                <input type="text" name="end" placeholder="00:00:00">
+              </div>
+            </div>
+          </div>
+        </div>
+        <input type="file" id="file-input" name="audio" hidden>
+      </form>
+    </div>
+
+    <div id="progress-container" class="progress-container hidden">
+      <progress id="upload-progress" value="0" max="100"></progress>
+    </div>
+
+    <div id="status-container" class="status-container hidden">
+      <p>Transcription started</p>
+      <button id="reset-page">Transcribe new file</button>
+    </div>
+  </main>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
