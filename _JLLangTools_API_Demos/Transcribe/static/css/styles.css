@@ -176,6 +176,19 @@ input {
   background: #888;
 }
 
+/* New status tag styling */
+.file-tags .tag-status {
+  margin-left: 0.5rem;
+  font-size: 0.9em;
+}
+.tag-status.complete {
+  background: #28a745;
+}
+.tag-status.pending {
+  background: #ffc107;
+  color: #000;
+}
+
 /* Indent children rows */
 .file-children {
   padding-left: 1.5rem;
@@ -187,3 +200,89 @@ input {
 .file-children .file-row:hover {
   background: rgba(0, 0, 0, 0.05);
 }
+
+.mapping-table {
+  width: auto;
+  border-collapse: collapse;
+  margin-top: .5rem;
+}
+.mapping-table th,
+.mapping-table td {
+  border: 1px solid #ddd;
+  padding: .5rem;
+  font-size: 12px;
+}
+.mapping-table th {
+  background: #f0f0f0;
+  text-align: left;
+}
+.mapping-table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Prevent wrapping in the first three columns (Chunk, Start, End) */
+.mapping-table th:nth-child(1),
+.mapping-table td:nth-child(1),
+.mapping-table th:nth-child(2),
+.mapping-table td:nth-child(2),
+.mapping-table th:nth-child(3),
+.mapping-table td:nth-child(3) {
+  white-space: nowrap;
+}
+
+/* static/css/styles.css additions */
+.details-viewer {
+  padding: 1rem;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.batch-meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+.batch-meta li {
+  margin-bottom: .5rem;
+}
+
+.batch-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+.batch-table th, .batch-table td {
+  border: 1px solid #ddd;
+  padding: .5rem;
+  text-align: left;
+  font-size: 13px;
+}
+.batch-table th {
+  background: #f4f4f4;
+}
+.status-icon {
+  text-align: center;
+  font-size: 16px;
+}
+
+/* Button styling – same as navbar */
+button {
+  background: #004080;       /* match .navbar background */
+  color: #fff;               /* white text */
+  border: none;              /* remove default border */
+  border-radius: 0.25rem;    /* slightly rounded corners */
+  padding: 0.5rem 1rem;      /* comfortable hit area */
+  font-family: inherit;      /* match your body font */
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #003366;       /* a tad darker on hover */
+}
+
+.segment-controls {
+  padding-bottom: 10px;
+}
+

@@ -115,7 +115,7 @@ def process_folder(batch_name: str):
             adapter.info("Loaded text %s (%d chars)", os.path.basename(txt_path), len(text))
 
             time_label = format_hms(start_abs // 1000)
-            transcript.append(f"{time_label}\t{text}")
+            transcript.append(f"{text}")
             srt_entries.append({
                 'idx': counter,
                 'start': format_srt_timestamp(start_abs),

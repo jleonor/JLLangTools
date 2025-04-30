@@ -4,9 +4,9 @@ import pathlib
 import urllib.parse
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_from_directory, abort, send_file
-import pathlib
 import requests
 from werkzeug.utils import secure_filename
+from analytics.dashboard import init_dashboard
 
 # Helpers
 from utils.atomic_queue import AtomicQueue
@@ -39,6 +39,9 @@ API_URL = settings['transcribe']['api_url']
 
 # ── Flask app ──────────────────────────────────────────────────────────────────
 app = Flask(__name__)
+
+# ── Dash app ──────────────────────────────────────────────────────────────────
+dash_app = init_dashboard(app, api_url=API_URL)
 
 @app.route('/')
 def index():
@@ -128,7 +131,7 @@ def transcribe():
         code = e.response.status_code if e.response is not None else 500
         return text, code
 
-# ── New: Files Browser ──────────────────────────────────────────────────────────
+# ── Files Browser ────────────────────────────────────────────────────────────────
 @app.route('/files')
 def files_index():
     # fetch device for navbar
@@ -146,6 +149,8 @@ def files_index():
             info = json.load(open(rq, 'r', encoding='utf-8'))
             info['folder'] = name
             info['sent_time_dt'] = datetime.fromisoformat(info['sent_time'])
+            # NEW: mark batch completed when all tasks have timestamps
+            info['completed'] = all(v is not None for v in info.get('tasks', {}).values())
             batches.append(info)
     # sort descending by sent_time
     batches.sort(key=lambda b: b['sent_time_dt'], reverse=True)
@@ -165,9 +170,7 @@ def download_file(subpath):
     if not full_path.is_file():
         abort(404)
 
-    # send_file takes the filesystem path directly and sets Content-Disposition for you
     return send_file(str(full_path), as_attachment=True)
-
 
 @app.route('/files/content')
 def file_content():
