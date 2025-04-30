@@ -1,7 +1,25 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set SETTINGS_FILE=C:\Users\jonat\OneDrive\Desktop\DevProjects\JLLangTools\appsettings.json
+REM ──────────────────────────────────────────────────────────────────────────────
+REM 1) Determine where appsettings.json is
+REM ──────────────────────────────────────────────────────────────────────────────
+
+REM %~dp0 is the directory this script lives in (with trailing slash)
+set "SCRIPT_DIR=%~dp0"
+
+REM If appsettings.json exists three levels up, use that; otherwise assume it’s here
+if exist "%SCRIPT_DIR%..\..\..\appsettings.json" (
+    for %%I in ("%SCRIPT_DIR%..\..\..\appsettings.json") do set "SETTINGS_FILE=%%~fI"
+) else if exist "%SCRIPT_DIR%appsettings.json" (
+    for %%I in ("%SCRIPT_DIR%appsettings.json")     do set "SETTINGS_FILE=%%~fI"
+) else (
+    echo ERROR: Could not find appsettings.json in %SCRIPT_DIR% or three levels up.
+    pause
+    exit /b 1
+)
+
+echo Using settings file: %SETTINGS_FILE%
 
 :: Retrieve API URL from JSON settings
 for /f "delims=" %%A in ('powershell -NoProfile -Command "(Get-Content '%SETTINGS_FILE%' | ConvertFrom-Json).transcribe.api_url"') do set API_URL=%%A
