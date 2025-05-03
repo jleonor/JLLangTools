@@ -23,7 +23,9 @@
           <div class="column">
             <h3>Model</h3>
             <select id="model-select">
-              <option value="">Loading...</option>
+              {% for lang in languages %}
+                <option value="{{ lang }}">{{ lang }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="column">

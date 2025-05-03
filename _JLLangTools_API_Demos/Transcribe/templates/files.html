@@ -8,7 +8,7 @@
 </head>
 <body>
   <nav class="navbar">
-    <span class="title">JLLangTools Transcription API Demo ({{ device }}) - Files </span>
+    <span class="title">JLLangTools Transcription API Demo ({{ device }}) - Files</span>
     <div class="links">
       <a href="/">Upload</a>
       <a href="/analytics">Analytics</a>
@@ -16,16 +16,10 @@
   </nav>
 
   <main class="files-main">
-    <!-- Left column: list of batches -->
     <div class="files-column" id="files-list">
       {% for b in batches %}
-        <div class="file-row"
-             data-folder="{{ b.folder }}"
-             data-filename="{{ b.audio_filename }}"
-             data-segments="{{ b.segments|length }}">
-          <span class="file-name">
-            {{ b.audio_filename.rsplit('.',1)[0].replace('_',' ') }}
-          </span>
+        <div class="file-row" data-folder="{{ b.folder }}" data-filename="{{ b.audio_filename }}" data-segments="{{ b.segments }}">
+          <span class="file-name">{{ b.audio_filename.rsplit('.',1)[0].replace('_',' ') }}</span>
           <div class="file-tags">
             <span class="tag-lang">{{ b.lang_key }}</span>
             <span class="tag-time">{{ b.sent_time_dt.strftime('%d %b %Y %H:%M:%S') }}</span>
@@ -38,10 +32,8 @@
       {% endfor %}
     </div>
 
-    <!-- Right column: viewer & download -->
     <div class="files-column" id="file-viewer-pane">
       <button id="download-btn" disabled>Download</button>
-      <!-- Use <pre> to preserve whitespace/new-lines -->
       <pre id="file-viewer" class="details-viewer"></pre>
     </div>
   </main>
