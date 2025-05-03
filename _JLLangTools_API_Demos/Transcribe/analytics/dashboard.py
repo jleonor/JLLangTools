@@ -76,7 +76,7 @@ def init_dashboard(server, api_url: str):
         ], className="navbar"),
 
         html.Div([
-            # Filter controls - full-width flex children
+            # Filter controls - compact, fixed-size, left-aligned row
             html.Div([
                 html.Div(
                     dcc.DatePickerRange(
@@ -84,9 +84,8 @@ def init_dashboard(server, api_url: str):
                         display_format='YYYY-MM-DD',
                         start_date=df['sentTime'].min().date(),
                         end_date=df['sentTime'].max().date(),
-                        style={'width': '80%'}
+                        style={'height': '50px'}
                     ),
-                    style={'flex': 1}
                 ),
                 html.Div(
                     dcc.Dropdown(
@@ -94,35 +93,45 @@ def init_dashboard(server, api_url: str):
                         options=[{'label': k, 'value': k} for k in sorted(df['langKey'].unique())],
                         placeholder="Select language",
                         multi=True,
-                        style={'width': '80%'}
-                    ),
-                    style={'flex': 1}
+                        style={'width': '200px', 'height': '47px'}
+                    )
                 ),
                 html.Div(
                     dcc.Input(
                         id='include-string',
                         type='text',
                         placeholder='Include filename contains...',
-                        style={'width': '80%'}
-                    ),
-                    style={'flex': 1}
+                        style={'width': '200px', 'height': '41px'}
+                    )
                 ),
                 html.Div(
                     dcc.Input(
                         id='exclude-string',
                         type='text',
                         placeholder='Exclude filename contains...',
-                        style={'width': '80%'}
-                    ),
-                    style={'flex': 1}
+                        style={'width': '200px', 'height': '41px'}
+                    )
                 ),
-            ], style={'display': 'flex', 'gap': '1rem', 'margin': '1rem', 'width': '100%'}),
+            ], style={
+                'display': 'flex',
+                'flexWrap': 'wrap',
+                'gap': '0.5rem',
+                'justifyContent': 'flex-start',
+                'margin': '1rem 0',
+            }),
 
             dcc.Graph(id='line-chart', style={'width': '100%'}),
 
-            html.Div(id='summary-cards', style={'display': 'flex', 'gap': '1rem', 'flexWrap': 'wrap', 'padding': '1rem'})
+            html.Div(id='summary-cards', style={
+                'display': 'flex',
+                'gap': '1rem',
+                'flexWrap': 'wrap',
+                'padding': '1rem'
+            })
         ])
     ])
+
+
 
     @dash_app.callback(
         [Output('line-chart', 'figure'),
