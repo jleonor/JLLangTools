@@ -191,7 +191,8 @@ def scan_and_process():
     for batch in batches:
         try:
             data     = load_request(os.path.join(DATA_DIR, batch))
-            wav_file = data['audio_filename']
+            original_file = data['audio_filename']
+            wav_file = os.path.splitext(original_file)[0] + '.wav'
             wav_path = os.path.join(DATA_DIR, batch, wav_file)
             process_wav(wav_path)
         except Exception as e:

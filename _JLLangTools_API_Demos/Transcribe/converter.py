@@ -6,7 +6,7 @@ from pydub import AudioSegment
 
 from utils.log_utils import setup_logger
 from utils.atomic_queue import AtomicQueue
-from utils.request_utils import load_request, save_request, update_task_timestamp
+from utils.request_utils import load_request, update_task_timestamp
 
 # ── Configuration ────────────────────────────────────────────────────────────
 BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
@@ -59,10 +59,6 @@ def convert_folder(batch_name: str) -> bool:
         audio = AudioSegment.from_file(orig_path)
         adapter.debug("AudioSegment loaded, exporting to WAV: %s", wav_path)
         audio.export(wav_path, format='wav')
-
-        # 4) Update request.json with new filename
-        data['audio_filename'] = wav_name
-        save_request(subfolder, data)
 
         # 5) Stamp completion
         update_task_timestamp(subfolder, 'converterCompleted')
