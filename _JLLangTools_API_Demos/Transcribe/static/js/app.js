@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const progress = document.getElementById('upload-progress');
   const statusCont = document.getElementById('status-container');
   const resetPage = document.getElementById('reset-page');
+  const progressLabel = document.getElementById('progress-label');
+
 
   // load models
   fetch('/languages')
@@ -67,9 +69,12 @@ document.addEventListener('DOMContentLoaded', () => {
     xhr.open('POST', '/transcribe');
     xhr.upload.onprogress = e => {
       if (e.lengthComputable) {
-        progress.value = (e.loaded / e.total) * 100;
+        const percent = (e.loaded / e.total) * 100;
+        progress.value = percent;
+        progressLabel.textContent = `Uploading: ${percent.toFixed(1)}%`;
       }
     };
+    
     xhr.onload = () => {
       progCont.classList.add('hidden');
       statusCont.classList.remove('hidden');
