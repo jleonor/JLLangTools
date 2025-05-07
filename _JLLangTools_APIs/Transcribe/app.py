@@ -4,6 +4,7 @@ import io
 import contextlib
 import librosa
 import torch
+from collections import OrderedDict
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 
 try:
@@ -11,6 +12,7 @@ try:
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
+
 app = Flask(__name__)
 
 # Mapping from language keys to model directories
@@ -22,54 +24,65 @@ MODEL_MAPPING = {
     "xx-medium": "Whisper/openai_whisper-medium",
 }
 
+# LRU model cache
+class ModelManager:
+    def __init__(self, max_models=2):
+        self.cache = OrderedDict()
+        self.max_models = max_models
+
+    def get_model(self, lang_key):
+        model_dir = MODEL_MAPPING.get(lang_key)
+        if not model_dir:
+            raise ValueError(f"No model mapping found for language key: {lang_key}")
+
+        if lang_key in self.cache:
+            self.cache.move_to_end(lang_key)
+            return self.cache[lang_key]
+
+        # Load model and processor
+        processor = WhisperProcessor.from_pretrained(model_dir)
+        model = WhisperForConditionalGeneration.from_pretrained(model_dir)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model.to(device)
+
+        # Evict LRU if needed
+        if len(self.cache) >= self.max_models:
+            evicted_key, _ = self.cache.popitem(last=False)
+            print(f"Evicted model: {evicted_key}")
+
+        self.cache[lang_key] = {"processor": processor, "model": model, "device": device}
+        return self.cache[lang_key]
+
+# Instantiate model manager
+model_manager = ModelManager(max_models=2)
 
 def suppress_stderr(func, *args, **kwargs):
-    """Helper to run a function while suppressing stderr output."""
     with open(os.devnull, 'w') as devnull, contextlib.redirect_stderr(devnull):
         return func(*args, **kwargs)
 
 def transcribe_audio(audio_file, lang_key):
-    """
-    Transcribe an audio file using the specified Whisper model.
-    Expects a file-like object and a language key.
-    """
-    # Read the uploaded file into a BytesIO stream
+    # Load audio
     audio_bytes = audio_file.read()
     audio_file_obj = io.BytesIO(audio_bytes)
-
-    # Load audio using librosa (forcing a sample rate of 16000 Hz)
     audio, sr = suppress_stderr(librosa.load, audio_file_obj, sr=16000)
 
-    # Determine the model directory from the mapping
-    model_dir = MODEL_MAPPING.get(lang_key)
-    if model_dir is None:
-        raise ValueError(f"No model mapping found for language key: {lang_key}")
-
-    # For supported languages, force language in the processor call
-    force_language = lang_key if lang_key in ("en", "fr", "es") else None
-
-    # Load the processor and model from the specified model directory
-    processor = WhisperProcessor.from_pretrained(model_dir)
-    model = WhisperForConditionalGeneration.from_pretrained(model_dir)
-
-    # Move model to GPU if available
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
+    # Load model and processor from manager
+    model_data = model_manager.get_model(lang_key)
+    processor = model_data["processor"]
+    model = model_data["model"]
+    device = model_data["device"]
 
     if PSUTIL_AVAILABLE:
         process = psutil.Process()
-        print(f"Starting transcription. Memory usage: {process.memory_info().rss / (1024*1024):.2f} MB")
+        print(f"Using model '{lang_key}'. Memory usage: {process.memory_info().rss / (1024*1024):.2f} MB")
 
-    # Process the audio and generate transcription
+    # Prepare input and transcribe
+    force_language = lang_key if lang_key in ("en", "fr", "es") else None
     if force_language:
         inputs = processor(audio, sampling_rate=16000, return_tensors="pt", language=force_language)
-        # Move input features to the same device as the model
         inputs.input_features = inputs.input_features.to(device)
         forced_decoder_ids = processor.get_decoder_prompt_ids(language=force_language, task="transcribe")
-        if forced_decoder_ids and len(forced_decoder_ids) > 0:
-            generated_ids = model.generate(inputs.input_features, forced_decoder_ids=forced_decoder_ids)
-        else:
-            generated_ids = model.generate(inputs.input_features)
+        generated_ids = model.generate(inputs.input_features, forced_decoder_ids=forced_decoder_ids) if forced_decoder_ids else model.generate(inputs.input_features)
     else:
         inputs = processor(audio, sampling_rate=16000, return_tensors="pt")
         inputs.input_features = inputs.input_features.to(device)
@@ -80,12 +93,6 @@ def transcribe_audio(audio_file, lang_key):
 
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
-    """
-    API endpoint that transcribes an uploaded audio file.
-    Expects form-data with:
-      - "audio": the audio file
-      - "lang_key": optional language key (defaults to "en")
-    """
     if 'audio' not in request.files:
         return jsonify({'error': 'No audio file provided'}), 400
 
@@ -100,23 +107,12 @@ def transcribe():
 
 @app.route('/device', methods=['GET'])
 def get_device():
-    """
-    Endpoint to check whether GPU is available.
-    """
     device = "GPU" if torch.cuda.is_available() else "CPU"
     return jsonify({"device": device})
 
 @app.route('/languages', methods=['GET'])
 def get_languages():
-    """
-    Endpoint to return supported language keys from the model mapping.
-    """
     return jsonify({"languages": list(MODEL_MAPPING.keys())})
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
-
-
-
