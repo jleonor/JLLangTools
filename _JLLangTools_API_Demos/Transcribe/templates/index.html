@@ -8,16 +8,18 @@
 </head>
 <body>
   <nav class="navbar">
-    <span class="title">JLLangTools Transcription API Demo ({{ device }}) - Upload</span>
+    <span class="title">
+      JLLangTools Transcription API Demo ({{ device }}) – Upload
+    </span>
     <div class="links">
       <a href="/files">Files</a>
       <a href="/analytics">Analytics</a>
     </div>
   </nav>
 
-  <main>
+  <main class="upload-page">
     <div id="upload-box" class="upload-box">
-      <p>Drag & drop or click to upload</p>
+      <p>Drag &amp; drop files or click to select files</p>
       <form id="upload-form">
         <div class="columns">
           <div class="column">
@@ -38,12 +40,19 @@
               <div class="segment-row">
                 <input type="text" name="start" placeholder="00:00:00">
                 <span>to</span>
-                <input type="text" name="end" placeholder="00:00:00">
+                <input type="text" name="end"   placeholder="00:00:00">
               </div>
             </div>
           </div>
         </div>
-        <input type="file" id="file-input" name="audio" hidden>
+        <!-- allow multiple files -->
+        <input
+          type="file"
+          id="file-input"
+          name="audio"
+          multiple
+          hidden
+        >
       </form>
     </div>
 

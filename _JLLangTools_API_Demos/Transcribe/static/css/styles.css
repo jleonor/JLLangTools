@@ -38,7 +38,7 @@ main {
 
 /* Upload box */
 .upload-box {
-  width: 100%;
+  width: 95%;
   height: 90%;
   display: flex;
   flex-direction: column;
@@ -286,3 +286,10 @@ button:hover {
   padding-bottom: 10px;
 }
 
+/* only on the upload page, stack the progress & status vertically */
+main.upload-page {
+  /* switch from row (the default) to column */
+  flex-direction: column;
+  /* optional gap between them */
+  gap: 1rem;
+}
